@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.rtbOutData = new System.Windows.Forms.RichTextBox();
             this.btnConnect = new System.Windows.Forms.Button();
             this.devicesList = new System.Windows.Forms.ListBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -43,20 +42,17 @@
             this.rbUpdateDefault = new System.Windows.Forms.RadioButton();
             this.btnUpdate = new System.Windows.Forms.Button();
             this.lblBtOperationStatus = new System.Windows.Forms.Label();
+            this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.rtbDataToSend = new System.Windows.Forms.RichTextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.gbUpdateDeviceListOperationType.SuspendLayout();
+            this.flowLayoutPanel3.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // rtbOutData
-            // 
-            this.rtbOutData.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.rtbOutData.Location = new System.Drawing.Point(140, 189);
-            this.rtbOutData.Name = "rtbOutData";
-            this.rtbOutData.Size = new System.Drawing.Size(723, 108);
-            this.rtbOutData.TabIndex = 0;
-            this.rtbOutData.Text = "";
             // 
             // btnConnect
             // 
@@ -82,12 +78,13 @@
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15.92593F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 84.07407F));
-            this.tableLayoutPanel1.Controls.Add(this.rtbOutData, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.devicesList, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.lbInternalBT, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.btnUpdateInternalBtAdapters, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel1, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel2, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel3, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 1, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -122,7 +119,6 @@
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.Controls.Add(this.btnReadFromBt);
-            this.flowLayoutPanel1.Controls.Add(this.btnWriteToBt);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(140, 303);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
@@ -141,11 +137,12 @@
             // 
             // btnWriteToBt
             // 
-            this.btnWriteToBt.Location = new System.Drawing.Point(116, 3);
+            this.btnWriteToBt.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.25F);
+            this.btnWriteToBt.Location = new System.Drawing.Point(3, 3);
             this.btnWriteToBt.Name = "btnWriteToBt";
-            this.btnWriteToBt.Size = new System.Drawing.Size(75, 23);
+            this.btnWriteToBt.Size = new System.Drawing.Size(126, 35);
             this.btnWriteToBt.TabIndex = 1;
-            this.btnWriteToBt.Text = "Write to BT";
+            this.btnWriteToBt.Text = "Відправити";
             this.btnWriteToBt.UseVisualStyleBackColor = true;
             this.btnWriteToBt.Click += new System.EventHandler(this.btnWriteToBt_Click);
             // 
@@ -212,6 +209,52 @@
             this.lblBtOperationStatus.Size = new System.Drawing.Size(0, 13);
             this.lblBtOperationStatus.TabIndex = 6;
             // 
+            // flowLayoutPanel3
+            // 
+            this.flowLayoutPanel3.Controls.Add(this.btnWriteToBt);
+            this.flowLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel3.Location = new System.Drawing.Point(140, 189);
+            this.flowLayoutPanel3.Name = "flowLayoutPanel3";
+            this.flowLayoutPanel3.Size = new System.Drawing.Size(723, 108);
+            this.flowLayoutPanel3.TabIndex = 8;
+            // 
+            // tableLayoutPanel2
+            // 
+            this.tableLayoutPanel2.ColumnCount = 3;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 92.43697F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 7.563025F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 60F));
+            this.tableLayoutPanel2.Controls.Add(this.rtbDataToSend, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.label1, 0, 0);
+            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(140, 3);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 2;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 21.11111F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 78.88889F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(723, 180);
+            this.tableLayoutPanel2.TabIndex = 9;
+            // 
+            // rtbDataToSend
+            // 
+            this.rtbDataToSend.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtbDataToSend.Location = new System.Drawing.Point(3, 40);
+            this.rtbDataToSend.Name = "rtbDataToSend";
+            this.rtbDataToSend.Size = new System.Drawing.Size(606, 137);
+            this.rtbDataToSend.TabIndex = 0;
+            this.rtbDataToSend.Text = "53";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 18.25F);
+            this.label1.Location = new System.Drawing.Point(3, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(606, 37);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "Дані для відправки";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -220,19 +263,21 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel2.ResumeLayout(false);
             this.flowLayoutPanel2.PerformLayout();
             this.gbUpdateDeviceListOperationType.ResumeLayout(false);
             this.gbUpdateDeviceListOperationType.PerformLayout();
+            this.flowLayoutPanel3.ResumeLayout(false);
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel2.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.RichTextBox rtbOutData;
         private System.Windows.Forms.Button btnConnect;
         private System.Windows.Forms.ListBox devicesList;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
@@ -247,6 +292,10 @@
         private System.Windows.Forms.RadioButton rbUpdateDefault;
         private System.Windows.Forms.Button btnUpdate;
         private System.Windows.Forms.Label lblBtOperationStatus;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.RichTextBox rtbDataToSend;
+        private System.Windows.Forms.Label label1;
     }
 }
 

@@ -16,6 +16,7 @@ namespace BTReceiver
 {
     public partial class Form1 : Form
     {
+        private volatile bool readActive = false;
         byte[] btReceiverBuffer = new byte[2048];
         private BluetoothClient bluetoothClient;
 
@@ -29,7 +30,7 @@ namespace BTReceiver
         private void initStartingUI()
         {
             disableBluetoothFunctions();
-            disableWritingToBtUI();
+            disableIoUI();
         }
         /// <summary>
         /// 
@@ -39,8 +40,8 @@ namespace BTReceiver
         private bool updateBtAdapters(bool showDebug=true)
         {
             lbInternalBT.Items.Clear();
-            disableWritingToBtUI();
-                foreach (BluetoothRadio radio in BluetoothRadio.AllRadios)
+            disableIoUI();
+            foreach (BluetoothRadio radio in BluetoothRadio.AllRadios)
                 {
                     lbInternalBT.Items.Add(radio);
                 }
@@ -118,7 +119,7 @@ namespace BTReceiver
             {
                    //
 
-                this.BeginInvoke(new MethodInvoker(delegate { enableWritingToBtUI(); }));
+                this.BeginInvoke(new MethodInvoker(delegate { enableIoUi(); }));
                 Console.WriteLine("Connected");
                 //
             }
@@ -133,7 +134,29 @@ namespace BTReceiver
             btnWriteToBt.Enabled = false;
         }
 
-        private void btnUpdate_Click(object sender, EventArgs e)
+        private void disableReadingToBtUI()
+        {
+            btnReadFromBt.Enabled = false;
+        }
+        private void enableReadingToBtUI()
+        {
+            btnReadFromBt.Enabled = true;
+        }
+
+        private void enableIoUi()
+        {
+            enableWritingToBtUI();
+            enableReadingToBtUI();
+        }
+
+        private void disableIoUI()
+        {
+            disableWritingToBtUI();
+            disableReadingToBtUI();
+        }
+
+
+    private void btnUpdate_Click(object sender, EventArgs e)
         {
            lblBtOperationStatus.Text = "Триває оновлення пристроїв bluetooth";
             if (rbUpdateDefault.Checked)
@@ -150,7 +173,6 @@ namespace BTReceiver
             BluetoothDeviceInfo[] devices = thisDevice.EndDiscoverDevices(result);
             this.BeginInvoke(new MethodInvoker(delegate
             {
-                enableWritingToBtUI();
                 devicesList.Items.Clear();
                 foreach (var device in devices)
                 {
@@ -211,19 +233,24 @@ namespace BTReceiver
             new Thread(delegate()
             {
                 int totalBytesReaded = 0;
-                bool dataAvailable = true;
+                
                 var watch = System.Diagnostics.Stopwatch.StartNew();
                 using (FileStream fsSource = new FileStream("test.wav",
-             FileMode.OpenOrCreate, FileAccess.Write))
+             FileMode.Create, FileAccess.ReadWrite))
                 {
                     ZigzagAudioLibrary.WriteWavHeader(fsSource, IS_FLOATING_POINT, CHANNEL_COUNT,
                         BIT_DEPTH, SAMPLE_RATE, 0);
-                   
-                    while (dataAvailable)
+                    readActive = true;
+                    while (readActive)
                     {
                         try
                         {
-                            dataAvailable = bluetoothClient.GetStream().DataAvailable;
+                            bool dataAvailable = bluetoothClient.GetStream().DataAvailable;
+                            if (!dataAvailable)
+                            {
+                                Thread.Sleep(50);
+                                continue;
+                            }
                         }
                         catch (InvalidOperationException e)
                         {
@@ -231,12 +258,12 @@ namespace BTReceiver
                             {
                                 MessageBox.Show(e.Message, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }));
-                            dataAvailable = false;
-                            return;
+                            readActive = false;
                         }
                         int readed = 0;
                         try
                         {
+                            Console.WriteLine("Read new part started:");
                             readed = bluetoothClient.GetStream().Read(btReceiverBuffer, 0, btReceiverBuffer.Length);
                         }
                         catch (InvalidOperationException e)
@@ -245,8 +272,7 @@ namespace BTReceiver
                             {
                                 MessageBox.Show(e.Message, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }));
-                            dataAvailable = false;
-                            return;
+                            readActive = false;
                         }
                      
                         Console.WriteLine("received bytes:" + readed);
@@ -259,12 +285,13 @@ namespace BTReceiver
                         fsSource.Write(btReceiverBuffer, 0, readed);
                         totalBytesReaded += readed;
                     }
+                    double elapsedMs = watch.Elapsed.TotalMilliseconds;
                     int totalSampleCount = totalBytesReaded / BIT_DEPTH;
                     Console.WriteLine("totalSampleCount:" + totalSampleCount);
                     //Записуєм розмір сирих аудіоданих
                     ZigzagAudioLibrary.writeSubChunc2Size(fsSource, BIT_DEPTH, totalSampleCount);
-                    double elapsedMs = watch.Elapsed.TotalMilliseconds;
-                    Console.WriteLine("receiving time:" + elapsedMs);
+                    int speedKbPerSec = (int)(totalBytesReaded/elapsedMs);
+                    Console.WriteLine("receiving time:" + elapsedMs + " speed:"+ speedKbPerSec + " Kb/s");
                     fsSource.Flush();
                     fsSource.Close();
                     watch.Stop();
@@ -272,23 +299,49 @@ namespace BTReceiver
             }).Start();
         }
 
+        private void toggleReadButtonMode(bool readMode)
+        {
+            if (readMode) btnReadFromBt.Text = "Read";
+            else btnReadFromBt.Text = "Stop";
+        }
+
         private void btnAskDevice_Click(object sender, EventArgs e)
         {
-            BeginReadDataFromBT();
+            if (!readActive)
+            {
+                BeginReadDataFromBT();
+                toggleReadButtonMode(false);
+            }
+            else
+            {
+                toggleReadButtonMode(true);
+                StopReadingBT();
+            }
+           
+        }
+
+        private void StopReadingBT()
+        {
+            readActive = false;
         }
 
         private void btnWriteToBt_Click(object sender, EventArgs e)
         {
-            byte[] arr = new byte[1];
-            arr[0] = 53;
+            string strData = rtbDataToSend.Text;
+            byte[] arr = DataParser.parseBytesArray(strData);//53
             try
             {
-                bluetoothClient.GetStream().Write(arr, 0, 1);
+                bluetoothClient.GetStream().Write(arr,0,arr.Length);
             }
             catch (InvalidOperationException exception)
             {
                 MessageBox.Show(exception.Message, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            StopReadingBT();
         }
     }
 }
