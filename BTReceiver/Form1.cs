@@ -26,6 +26,7 @@ namespace BTReceiver
             updateBtAdapters(false);
             initBluetooth();
             disableConnectFunction();
+            disableDisconnectFunction();
         }
         private void initStartingUI()
         {
@@ -64,7 +65,9 @@ namespace BTReceiver
         {
             try
             {
-                if (bluetoothClient!=null) bluetoothClient.Close();
+                if (bluetoothClient!=null) { bluetoothClient.Close(); bluetoothClient.Dispose();
+                    bluetoothClient = null;
+                }
                  bluetoothClient = new BluetoothClient();
             }
             catch (PlatformNotSupportedException e)
@@ -90,6 +93,26 @@ namespace BTReceiver
             btnConnect.Enabled = true;
         }
 
+        public void disableDisconnectFunction()
+        {
+            btnDisconnect.Enabled = false;
+        }
+
+        public void enableDisconnectFunction()
+        {
+            btnDisconnect.Enabled = true;
+        }
+
+        public void disableUpdateFunction()
+        {
+            btnUpdate.Enabled = false;
+        }
+
+        public void enableUpdateFunction()
+        {
+            btnUpdate.Enabled = true;
+        }
+
         private void enableBluetoothFunctions()
         {
             btnConnect.Enabled = true;
@@ -98,13 +121,16 @@ namespace BTReceiver
 
         private void btnConnect_Click(object sender, EventArgs e)
         {
+            if (bluetoothClient == null)
+                initBluetooth();
             BluetoothDeviceInfoContainer selectedDevice = (BluetoothDeviceInfoContainer)devicesList.SelectedItem;
-            BluetoothDeviceInfo device = selectedDevice.BluetoothDeviceInfo;
             if (selectedDevice == null)
             {
                 Console.WriteLine("Cannot connect to null");
                 return;
             }
+            BluetoothDeviceInfo device = selectedDevice.BluetoothDeviceInfo;
+          
             bluetoothClient.SetPin("1234");
            // BluetoothSecurity.PairRequest(device.DeviceAddress, "1234");
             bluetoothClient.BeginConnect(device.DeviceAddress, BluetoothService.RFCommProtocol, new AsyncCallback(DeviceConnectedCallback),
@@ -119,7 +145,7 @@ namespace BTReceiver
             {
                    //
 
-                this.BeginInvoke(new MethodInvoker(delegate { enableIoUi(); }));
+                this.BeginInvoke(new MethodInvoker(delegate { enableIoUi(); enableDisconnectFunction(); }));          
                 Console.WriteLine("Connected");
                 //
             }
@@ -191,7 +217,8 @@ namespace BTReceiver
                 }
                 if (devices.Length > 0)
                 {
-                    enableConnectFunction();
+                    if (!bluetoothClient.Connected)
+                        enableConnectFunction();
                 }
                 else
                 {
@@ -223,23 +250,20 @@ namespace BTReceiver
             }
         }
 
-        private void BeginReadDataFromBT()
+        private void BeginReadDataFromBT(int channelCount, int byteDepth, int samplingRate,String fileName)
         {
             const bool IS_FLOATING_POINT = false;
-            const int CHANNEL_COUNT = 2;
-            const int BIT_DEPTH = 16;
-            const int SAMPLE_RATE = 22050;
-           
+            int bitDepth = byteDepth*8;
             new Thread(delegate()
             {
                 int totalBytesReaded = 0;
                 
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                using (FileStream fsSource = new FileStream("test.wav",
+                using (FileStream fsSource = new FileStream(fileName,
              FileMode.Create, FileAccess.ReadWrite))
                 {
-                    ZigzagAudioLibrary.WriteWavHeader(fsSource, IS_FLOATING_POINT, CHANNEL_COUNT,
-                        BIT_DEPTH, SAMPLE_RATE, 0);
+                    ZigzagAudioLibrary.WriteWavHeader(fsSource, IS_FLOATING_POINT, channelCount,
+                        bitDepth, samplingRate, 0);
                     readActive = true;
                     while (readActive)
                     {
@@ -286,10 +310,10 @@ namespace BTReceiver
                         totalBytesReaded += readed;
                     }
                     double elapsedMs = watch.Elapsed.TotalMilliseconds;
-                    int totalSampleCount = totalBytesReaded / BIT_DEPTH;
+                    int totalSampleCount = totalBytesReaded / bitDepth;
                     Console.WriteLine("totalSampleCount:" + totalSampleCount);
                     //Записуєм розмір сирих аудіоданих
-                    ZigzagAudioLibrary.writeSubChunc2Size(fsSource, BIT_DEPTH, totalSampleCount);
+                    ZigzagAudioLibrary.writeSubChunc2Size(fsSource, bitDepth, totalSampleCount);
                     int speedKbPerSec = (int)(totalBytesReaded/elapsedMs);
                     Console.WriteLine("receiving time:" + elapsedMs + " speed:"+ speedKbPerSec + " Kb/s");
                     fsSource.Flush();
@@ -309,7 +333,18 @@ namespace BTReceiver
         {
             if (!readActive)
             {
-                BeginReadDataFromBT();
+                int channelCount = 0, byteDepth = 0, samplingRate = 0;
+                try
+                {
+                    channelCount = Int32.Parse(tbChannelsCount.Text);
+                    byteDepth = Int32.Parse(tbByteDepth.Text);
+                    samplingRate = Int32.Parse(tbSampleRate.Text);
+                }
+                catch (Exception exc)
+                {
+                    return;
+                }
+                BeginReadDataFromBT(channelCount, byteDepth, samplingRate,tbFileName.Text);
                 toggleReadButtonMode(false);
             }
             else
@@ -342,6 +377,68 @@ namespace BTReceiver
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             StopReadingBT();
+        }
+
+        private void btnDisconnect_Click(object sender, EventArgs e)
+        {
+            disableDisconnectFunction();
+            if (!bluetoothClient.Connected)
+            {
+                MessageBox.Show("Не можливо розірвати, зєднання не встановлено", "Операція заборонена", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            bluetoothClient.Close();
+            bluetoothClient.Dispose();
+            bluetoothClient = null;
+            enableConnectFunction();
+        }
+
+        private void btnReadRawBytes_Click(object sender, EventArgs e)
+        {
+            int bytesToReadCount = 0;
+            if (tbRawBytesToReadCount.Text.Length == 0) return;
+            try
+            {
+                bytesToReadCount = Int32.Parse(tbRawBytesToReadCount.Text);
+            }
+            catch (FormatException  exc)
+            {
+                return;
+            }
+            if (!readActive)
+            {
+                int dataToRead = 0;
+                try
+                {
+                    dataToRead = Int32.Parse(tbRawBytesToReadCount.Text);
+                }
+                catch (Exception exception)
+                {
+                    
+                }
+                dataToRead = (dataToRead < btReceiverBuffer.Length) ? dataToRead : btReceiverBuffer.Length;
+               int readed = bluetoothClient.GetStream().Read(btReceiverBuffer, 0, dataToRead);
+                String receivedData="";
+                if (chRepresendDataAsString.Checked)
+                {
+                    receivedData = System.Text.Encoding.UTF8.GetString(btReceiverBuffer, 0, readed);
+                }
+                else
+                {
+                    for (int i = 0; i < readed; i++)
+                    {
+                        receivedData += btReceiverBuffer[i].ToString()+" ";
+                    }
+                    
+                }
+
+                Console.WriteLine("readed data:"+ receivedData);
+                rtbReceivedData.Text = receivedData;
+            }
+            else
+            {
+                StopReadingBT();
+            }
         }
     }
 }

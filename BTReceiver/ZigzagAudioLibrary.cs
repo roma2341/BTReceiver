@@ -24,7 +24,7 @@ namespace BTReceiver
                 fsSource.Position = position;
             }
         }
-        public static void WriteWavHeader(FileStream stream, bool isFloatingPoint, ushort channelCount, ushort bitDepth, int sampleRate, int totalSampleCount)
+        public static void WriteWavHeader(FileStream stream, bool isFloatingPoint, int channelCount, int bitDepth, int sampleRate, int totalSampleCount)
         {
             stream.Position = 0;
 

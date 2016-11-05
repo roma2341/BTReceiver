@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="BTReceiver.ZigzagAudioLibrary">
+    <Position X="0.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAABAQAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ZigzagAudioLibrary.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BTReceiver.Program">
+    <Position X="0.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BTReceiver.DataParser">
+    <Position X="2.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAA=</HashCode>
+      <FileName>DataParser.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BTReceiver.BluetoothDeviceInfoContainer">
+    <Position X="2.25" Y="1.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BluetoothDeviceInfoContainer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BTReceiver.Form1">
+    <Position X="1" Y="4.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AsAQgqS0FCQAgBARgIGCQGAimpAjABAAqNbIoCDEUKg=</HashCode>
+      <FileName>Form1.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
