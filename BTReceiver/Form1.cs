@@ -265,15 +265,22 @@ namespace BTReceiver
                     ZigzagAudioLibrary.WriteWavHeader(fsSource, IS_FLOATING_POINT, channelCount,
                         bitDepth, samplingRate, 0);
                     readActive = true;
+                    Random random = new Random();
                     while (readActive)
                     {
                         try
                         {
-                            bool dataAvailable = bluetoothClient.GetStream().DataAvailable;
+                            bool dataAvailable = true;
+                            if (!cbMockReading.Checked)
+                            dataAvailable = bluetoothClient.GetStream().DataAvailable;
                             if (!dataAvailable)
                             {
                                 Thread.Sleep(50);
                                 continue;
+                            }
+                            if (cbMockReading.Checked)
+                            {
+                                Thread.Sleep(50);
                             }
                         }
                         catch (InvalidOperationException e)
@@ -288,7 +295,15 @@ namespace BTReceiver
                         try
                         {
                             Console.WriteLine("Read new part started:");
-                            readed = bluetoothClient.GetStream().Read(btReceiverBuffer, 0, btReceiverBuffer.Length);
+                            if (cbMockReading.Checked)
+                            {
+                                readed = btReceiverBuffer.Length;
+                                random.NextBytes(btReceiverBuffer);
+                            }
+                            else
+                            {
+                                readed = bluetoothClient.GetStream().Read(btReceiverBuffer, 0, btReceiverBuffer.Length);
+                            }
                         }
                         catch (InvalidOperationException e)
                         {
@@ -439,6 +454,11 @@ namespace BTReceiver
             {
                 StopReadingBT();
             }
+        }
+
+        private void btnEnableTestUi_Click(object sender, EventArgs e)
+        {
+            enableReadingToBtUI();
         }
     }
 }
